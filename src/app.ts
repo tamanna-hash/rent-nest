@@ -4,6 +4,9 @@ import express, { Application, Request, Response } from "express";
 import config from "./config";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { notFound } from "./middlewares/notFound";
+import { authRoutes } from "./modules/auth/auth.route";
+import { PropertyRoutes } from "./modules/property/property.route";
+import { CategoryRoutes } from "./modules/category/category.route";
 
 const app : Application = express();
 
@@ -23,10 +26,10 @@ app.get("/",(req : Request, res : Response) => {
     res.send("Hello, World!");
 });
 
-
-
+app.use("/api/auth",authRoutes)
+app.use("/api/properties", PropertyRoutes);
+app.use("/api/categories", CategoryRoutes);
 app.use(notFound)
-
 app.use(globalErrorHandler)
 
 export default app;

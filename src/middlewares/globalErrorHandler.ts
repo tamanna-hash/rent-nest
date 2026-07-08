@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
+import { Prisma } from "../../generated/prisma/client";
 
 
 export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
