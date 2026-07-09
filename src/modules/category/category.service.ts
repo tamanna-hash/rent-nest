@@ -43,7 +43,7 @@ const getSingleCategory = async (id: string) => {
   });
 
   if (!category) {
-    throw new AppError(httpStatus.NOT_FOUND, "Category not found");
+    throw new Error("Category not found");
   }
 
   return category;

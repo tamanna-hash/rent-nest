@@ -1,18 +1,22 @@
 import { Router } from "express";
 import { Role } from "../../../generated/prisma/enums";
-import { RentalRequestController } from "./rentalRequest.controller";
 import { auth } from "../../middlewares/auth";
-import { validateRequest } from "../../middlewares/validateRequest";
-import { RentalRequestValidation } from "./rentalRequest.validation";
+import { RentalRequestController } from "./rental.controller";
+
 
 const router = Router();
 
-// Tenant
+// Tenant Routes
 router.post(
   "/",
   auth(Role.TENANT),
-  validateRequest(RentalRequestValidation.createRentalRequestValidationSchema),
   RentalRequestController.createRentalRequest
+);
+
+router.get(
+  "/",
+  auth(Role.ADMIN),
+  RentalRequestController.getAllRentalRequests
 );
 
 router.get(
@@ -27,7 +31,7 @@ router.delete(
   RentalRequestController.cancelRentalRequest
 );
 
-// Landlord
+// Landlord Routes
 router.get(
   "/landlord",
   auth(Role.LANDLORD),

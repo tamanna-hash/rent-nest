@@ -8,30 +8,33 @@ import { authRoutes } from "./modules/auth/auth.route";
 import { PropertyRoutes } from "./modules/property/property.route";
 import { CategoryRoutes } from "./modules/category/category.route";
 import { RentalRequestRoutes } from "./modules/rental/rental.route";
+import { ReviewRoutes } from "./modules/review/review.route";
 
-const app : Application = express();
+const app: Application = express();
 
-app.use(cors({
-    origin : config.app_url,
-    credentials : true,
-}))
+app.use(
+  cors({
+    origin: config.app_url,
+    credentials: true,
+  }),
+);
 
 // app.use("/api/subscription/webhook", express.raw({ type: 'application/json' }))
 
 app.use(express.json());
-app.use(express.urlencoded({ extended : true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-app.get("/",(req : Request, res : Response) => {
-    res.send("Hello, World!");
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello, World!");
 });
 
-app.use("/api/auth",authRoutes)
+app.use("/api/auth", authRoutes);
 app.use("/api/properties", PropertyRoutes);
 app.use("/api/categories", CategoryRoutes);
-app.use("/api/rentals",RentalRequestRoutes)
-app.use(notFound)
-app.use(globalErrorHandler)
+app.use("/api/rentals", RentalRequestRoutes);
+app.use("/api/reviews", ReviewRoutes);
+app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;

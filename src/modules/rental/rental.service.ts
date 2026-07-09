@@ -1,8 +1,8 @@
 import httpStatus from "http-status";
 import { RentalStatus, Role } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import AppError from "../../errors/AppError";
-import { CreateRentalRequestPayload } from "./rentalRequest.interface";
+import { CreateRentalRequestPayload } from "./rental.interface";
+
 
 const createRentalRequest = async (
   tenantId: string,
@@ -16,14 +16,12 @@ const createRentalRequest = async (
   });
 
   if (!property) {
-    throw new AppError(httpStatus.NOT_FOUND, "Property not found");
+    throw new Error("Property not found");
   }
 
   // Check property availability
   if (!property.isAvailable) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Property is not available for rent"
+    throw new Error(      "Property is not available for rent"
     );
   }
 
@@ -33,13 +31,11 @@ const createRentalRequest = async (
   });
 
   if (!tenant) {
-    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    throw new Error("User not found");
   }
 
   if (tenant.role !== Role.TENANT) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "Only tenants can request a property"
+    throw new Error(      "Only tenants can request a property"
     );
   }
 
@@ -53,9 +49,7 @@ const createRentalRequest = async (
   });
 
   if (existingRequest) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "You already have a pending request for this property"
+    throw new Error(      "You already have a pending request for this property"
     );
   }
 
@@ -68,6 +62,35 @@ const createRentalRequest = async (
     include: {
       property: true,
       tenant: true,
+    },
+  });
+};
+
+const getAllRentalRequests = async () => {
+  return prisma.rentalRequest.findMany({
+    include: {
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      property: {
+        include: {
+          landlord: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+      payment: true,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 };
@@ -117,20 +140,16 @@ const approveRentalRequest = async (
   });
 
   if (!request) {
-    throw new AppError(httpStatus.NOT_FOUND, "Rental request not found");
+    throw new Error("Rental request not found");
   }
 
   if (request.property.landlordId !== landlordId) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "You are not authorized to approve this request"
+    throw new Error(      "You are not authorized to approve this request"
     );
   }
 
   if (request.status !== RentalStatus.PENDING) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Rental request has already been processed"
+    throw new Error(      "Rental request has already been processed"
     );
   }
 
@@ -175,20 +194,16 @@ const rejectRentalRequest = async (
   });
 
   if (!request) {
-    throw new AppError(httpStatus.NOT_FOUND, "Rental request not found");
+    throw new Error("Rental request not found");
   }
 
   if (request.property.landlordId !== landlordId) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "You are not authorized to reject this request"
+    throw new Error(      "You are not authorized to reject this request"
     );
   }
 
   if (request.status !== RentalStatus.PENDING) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Rental request has already been processed"
+    throw new Error(      "Rental request has already been processed"
     );
   }
 
@@ -213,20 +228,16 @@ const cancelRentalRequest = async (
   });
 
   if (!request) {
-    throw new AppError(httpStatus.NOT_FOUND, "Rental request not found");
+    throw new Error("Rental request not found");
   }
 
   if (request.tenantId !== tenantId) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "You are not authorized to cancel this request"
+    throw new Error(      "You are not authorized to cancel this request"
     );
   }
 
   if (request.status !== RentalStatus.PENDING) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only pending requests can be cancelled"
+    throw new Error(      "Only pending requests can be cancelled"
     );
   }
 
@@ -240,6 +251,7 @@ const cancelRentalRequest = async (
 export const RentalRequestService = {
   createRentalRequest,
   getMyRentalRequests,
+  getAllRentalRequests,
   getRentalRequestsForLandlord,
   approveRentalRequest,
   rejectRentalRequest,

@@ -76,7 +76,7 @@ const getSingleProperty = async (id: string) => {
   });
 
   if (!property) {
-    throw new AppError(httpStatus.NOT_FOUND, "Property not found");
+    throw new Error("Property not found");
   }
 
   return property;
@@ -94,13 +94,11 @@ const updateProperty = async (
   });
 
   if (!property) {
-    throw new AppError(httpStatus.NOT_FOUND, "Property not found");
+    throw new Error("Property not found");
   }
 
   if (property.landlordId !== landlordId) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "You are not authorized to update this property"
+    throw new Error("You are not authorized to update this property"
     );
   }
 
@@ -123,13 +121,11 @@ const deleteProperty = async (id: string, landlordId: string) => {
   });
 
   if (!property) {
-    throw new AppError(httpStatus.NOT_FOUND, "Property not found");
+    throw new Error("Property not found");
   }
 
   if (property.landlordId !== landlordId) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      "You are not authorized to delete this property"
+    throw new Error(      "You are not authorized to delete this property"
     );
   }
 

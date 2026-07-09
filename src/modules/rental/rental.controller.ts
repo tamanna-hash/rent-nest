@@ -2,7 +2,7 @@ import httpStatus from "http-status";
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { RentalRequestService } from "./rentalRequest.service";
+import { RentalRequestService } from "./rental.service";
 
 const createRentalRequest = catchAsync(async (req: Request, res: Response) => {
   const result = await RentalRequestService.createRentalRequest(
@@ -17,6 +17,19 @@ const createRentalRequest = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getAllRentalRequests = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await RentalRequestService.getAllRentalRequests();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Rental requests retrieved successfully",
+      data: result,
+    });
+  }
+);
 
 const getMyRentalRequests = catchAsync(async (req: Request, res: Response) => {
   const result = await RentalRequestService.getMyRentalRequests(req.user!.id);
@@ -47,7 +60,7 @@ const approveRentalRequest = catchAsync(
   async (req: Request, res: Response) => {
     const result = await RentalRequestService.approveRentalRequest(
       req.user!.id,
-      req.params.id
+      req.params.id as string
     );
 
     sendResponse(res, {
@@ -63,8 +76,8 @@ const rejectRentalRequest = catchAsync(
   async (req: Request, res: Response) => {
     const result = await RentalRequestService.rejectRentalRequest(
       req.user!.id,
-      req.params.id
-    );
+      req.params.id as string
+    ); 
 
     sendResponse(res, {
       success: true,
@@ -79,7 +92,7 @@ const cancelRentalRequest = catchAsync(
   async (req: Request, res: Response) => {
     const result = await RentalRequestService.cancelRentalRequest(
       req.user!.id,
-      req.params.id
+      req.params.id as string
     );
 
     sendResponse(res, {
@@ -94,6 +107,7 @@ const cancelRentalRequest = catchAsync(
 export const RentalRequestController = {
   createRentalRequest,
   getMyRentalRequests,
+  getAllRentalRequests,
   getRentalRequestsForLandlord,
   approveRentalRequest,
   rejectRentalRequest,
