@@ -5,10 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import { PropertyService } from "./property.service";
 
 const createProperty = catchAsync(async (req: Request, res: Response) => {
-  const result = await PropertyService.createProperty(
-    req.body,
-    req.user!.id
-  );
+  const result = await PropertyService.createProperty(req.body, req.user!.id);
 
   sendResponse(res, {
     success: true,
@@ -18,8 +15,8 @@ const createProperty = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllProperties = catchAsync(async (_req: Request, res: Response) => {
-  const result = await PropertyService.getAllProperties();
+const getAllProperties = catchAsync(async (req: Request, res: Response) => {
+  const result = await PropertyService.getAllProperties(req.query);
 
   sendResponse(res, {
     success: true,
@@ -30,7 +27,9 @@ const getAllProperties = catchAsync(async (_req: Request, res: Response) => {
 });
 
 const getSingleProperty = catchAsync(async (req: Request, res: Response) => {
-  const result = await PropertyService.getSingleProperty(req.params.id as string);
+  const result = await PropertyService.getSingleProperty(
+    req.params.id as string,
+  );
 
   sendResponse(res, {
     success: true,
@@ -42,9 +41,9 @@ const getSingleProperty = catchAsync(async (req: Request, res: Response) => {
 
 const updateProperty = catchAsync(async (req: Request, res: Response) => {
   const result = await PropertyService.updateProperty(
-    req.params.id,
+    req.params.id as string,
     req.body,
-    req.user!.id
+    req.user!.id,
   );
 
   sendResponse(res, {
@@ -56,7 +55,7 @@ const updateProperty = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteProperty = catchAsync(async (req: Request, res: Response) => {
-  await PropertyService.deleteProperty(req.params.id, req.user!.id);
+  await PropertyService.deleteProperty(req.params.id as string, req.user!.id);
 
   sendResponse(res, {
     success: true,

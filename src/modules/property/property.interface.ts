@@ -22,3 +22,14 @@ export interface UpdatePropertyPayload {
   categoryId?: string;
   isAvailable?: boolean;
 }
+
+export interface PropertyFilters {
+  search?: string;
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  propertyType?: string;
+  amenities?: string[];
+  page?: number;
+  limit?: number;
+}

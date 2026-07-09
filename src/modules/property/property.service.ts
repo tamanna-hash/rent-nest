@@ -2,8 +2,11 @@ import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import {
   CreatePropertyPayload,
+  PropertyFilters,
+  PropertyQuery,
   UpdatePropertyPayload,
 } from "./property.interface";
+import { Prisma } from "../../../generated/prisma/client";
 
 const createProperty = async (
   payload: CreatePropertyPayload,
@@ -39,22 +42,94 @@ const createProperty = async (
   return property;
 };
 
-const getAllProperties = async () => {
-  return await prisma.property.findMany({
-    include: {
-      category: true,
-      landlord: {
-        select: {
-          id: true,
-          name: true,
+const getAllProperties = async (filters: PropertyFilters = {}) => {
+  const {
+    search,
+    location,
+    minPrice,
+    maxPrice,
+    propertyType,
+    amenities,
+    page = 1,
+    limit = 20,
+  } = filters;
+
+  const andConditions: Prisma.PropertyWhereInput[] = [];
+
+  if (search) {
+    andConditions.push({
+      OR: [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { location: { contains: search, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if (location) {
+    andConditions.push({
+      location: { contains: location, mode: "insensitive" },
+    });
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    andConditions.push({
+      price: {
+        ...(minPrice !== undefined ? { gte: minPrice } : {}),
+        ...(maxPrice !== undefined ? { lte: maxPrice } : {}),
+      },
+    });
+  }
+
+  if (propertyType) {
+    andConditions.push({
+      category: { name: { equals: propertyType, mode: "insensitive" } },
+    });
+  }
+
+  if (amenities && amenities.length > 0) {
+    andConditions.push({
+      amenities: { hasEvery: amenities }, // use `hasSome` if you want ANY match instead of ALL
+    });
+  }
+
+  const where: Prisma.PropertyWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const [properties, total] = await Promise.all([
+    prisma.property.findMany({
+      where,
+      include: {
+        category: true,
+        landlord: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.property.count({ where }),
+  ]);
+
+  return {
+    data: properties,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  };
 };
+
+export default getAllProperties;
+
 
 const getSingleProperty = async (id: string) => {
   const property = await prisma.property.findUnique({
