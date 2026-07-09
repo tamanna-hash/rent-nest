@@ -4,21 +4,33 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { paymentService } from "./subscription.service";
 
-
 const createPaymentIntent = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user!.id;
     const { rentalRequestId } = req.body;
 
-    const result = await paymentService.createPaymentIntent(
-      userId,
-      rentalRequestId
-    );
+    const result = await paymentService.createPaymentIntent(userId, rentalRequestId);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Payment intent created successfully",
+      data: result,
+    });
+  }
+);
+
+const createCheckoutSession = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user!.id;
+    const { rentalRequestId } = req.body;
+
+    const result = await paymentService.createCheckoutSession(userId, rentalRequestId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Checkout session created successfully",
       data: result,
     });
   }
@@ -31,9 +43,7 @@ const handleWebhook = catchAsync(
 
     await paymentService.handleWebhook(payload, signature);
 
-    res.status(200).json({
-      received: true,
-    });
+    res.status(200).json({ received: true });
   }
 );
 
@@ -70,6 +80,7 @@ const getPaymentById = catchAsync(
 
 export const paymentController = {
   createPaymentIntent,
+  createCheckoutSession,
   handleWebhook,
   getMyPayments,
   getPaymentById,

@@ -3,30 +3,36 @@ import { Role } from "../../../generated/prisma/enums";
 import { auth } from "../../middlewares/auth";
 import { paymentController } from "./subscription.controller";
 
-
 const router = Router();
 
-// Create Payment Intent
+// Create Payment Intent (Stripe Elements / in-page payment)
 router.post(
   "/create-payment-intent",
   auth(Role.TENANT),
   paymentController.createPaymentIntent
 );
 
-// Stripe Webhook
+// Create Checkout Session (Stripe-hosted page with success/cancel redirect)
+router.post(
+  "/create-checkout-session",
+  auth(Role.TENANT),
+  paymentController.createCheckoutSession
+);
+
+// Stripe Webhook (raw body — must come before express.json())
 router.post(
   "/webhook",
   paymentController.handleWebhook
 );
 
-// Get Logged-in Tenant's Payment History
+// Get logged-in tenant's full payment history
 router.get(
   "/my-payments",
   auth(Role.TENANT),
   paymentController.getMyPayments
 );
 
-// Get a Single Payment by ID
+// Get a single payment by ID
 router.get(
   "/:id",
   auth(Role.TENANT),

@@ -7,6 +7,7 @@ import {
 } from "./property.interface";
 import { Prisma } from "../../../generated/prisma/client";
 
+
 const createProperty = async (
   payload: CreatePropertyPayload,
   landlordId: string

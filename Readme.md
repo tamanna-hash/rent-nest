@@ -275,10 +275,19 @@ RentNest/
 
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
-| POST | `/api/payments/create-payment-intent` | Tenant | Create Stripe PaymentIntent for approved rental |
-| POST | `/api/payments/webhook` | Stripe | Stripe webhook (marks payment complete, sets rental ACTIVE) |
+| POST | `/api/payments/create-payment-intent` | Tenant | Create Stripe PaymentIntent (use with Stripe Elements) |
+| POST | `/api/payments/create-checkout-session` | Tenant | Create Stripe Checkout Session (returns redirect URL) |
+| POST | `/api/payments/webhook` | Stripe | Stripe webhook — handles `payment_intent.succeeded`, `payment_intent.payment_failed`, `checkout.session.completed` |
 | GET | `/api/payments/my-payments` | Tenant | View own payment history |
 | GET | `/api/payments/:id` | Tenant | Get single payment details |
+
+**Two payment flows are supported:**
+
+1. **PaymentIntent** (embedded) — frontend collects card details using Stripe Elements/React Stripe.js. Server creates intent, frontend confirms it, webhook fires `payment_intent.succeeded`.
+
+2. **Checkout Session** (hosted) — server creates a session and returns a `url`. Frontend redirects the user to that URL. On completion, Stripe redirects to `success_url` or `cancel_url` and fires `checkout.session.completed` webhook.
+
+Both flows mark the payment `COMPLETED` and the rental `ACTIVE` via webhook.
 
 ### Reviews — `/api/reviews`
 
@@ -352,6 +361,9 @@ JWT_REFRESH_EXPIRES_IN=7d
 
 STRIPE_SECRET_KEY=sk_test_your_stripe_key
 STRIPE_WEBHOOK_SECRET=_your_webhook_secret
+
+PAYMENT_SUCCESS_URL=http://localhost:3000/payment/success
+PAYMENT_CANCEL_URL=http://localhost:3000/payment/cancel
 ```
 
 ### Running the Server
@@ -370,6 +382,55 @@ npm start
 ```bash
 stripe listen --forward-to localhost:5000/api/payments/webhook
 ```
+
+---
+
+## Deploying to Vercel
+
+### 1. Push to GitHub
+
+Make sure your project is pushed to a GitHub repository.
+
+### 2. Import project on Vercel
+
+Go to [vercel.com](https://vercel.com), click **Add New Project**, and import your GitHub repo.
+
+### 3. Set environment variables
+
+In the Vercel project dashboard go to **Settings → Environment Variables** and add every key from your `.env`:
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `BCRYPT_SALT_ROUNDS` | e.g. `10` |
+| `JWT_ACCESS_SECRET` | JWT signing secret |
+| `JWT_REFRESH_SECRET` | JWT refresh secret |
+| `JWT_ACCESS_EXPIRES_IN` | e.g. `1d` |
+| `JWT_REFRESH_EXPIRES_IN` | e.g. `7d` |
+| `STRIPE_SECRET_KEY` | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `PAYMENT_SUCCESS_URL` | Frontend success redirect URL |
+| `PAYMENT_CANCEL_URL` | Frontend cancel redirect URL |
+| `APP_URL` | Frontend origin for CORS |
+
+> Do **not** add `PORT` — Vercel manages the port automatically.
+
+### 4. Deploy
+
+Vercel will run `npm run vercel-build` (which runs `prisma generate && tsc`) and then serve `src/server.ts` as a serverless function. Every push to your main branch triggers a new deployment automatically.
+
+### 5. Update Stripe webhook endpoint
+
+In your [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks), update the endpoint URL to your Vercel domain:
+
+```
+https://your-app.vercel.app/api/payments/webhook
+```
+
+Add these events:
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+- `checkout.session.completed`
 
 ---
 

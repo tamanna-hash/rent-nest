@@ -24,7 +24,7 @@ export const handlePaymentSucceeded = async (
     }),
     prisma.rentalRequest.update({
       where: { id: rentalRequestId },
-      data: { status: RentalStatus.APPROVED },
+      data: { status: RentalStatus.ACTIVE },
     }),
   ]);
 };
@@ -43,4 +43,30 @@ export const handlePaymentFailed = async (
     where: { rentalRequestId },
     data: { status: PaymentStatus.FAILED },
   });
+};
+
+export const handleCheckoutSessionCompleted = async (
+  session: Stripe.Checkout.Session
+) => {
+  const rentalRequestId = session.metadata?.rentalRequestId;
+
+  if (!rentalRequestId) {
+    console.log("Webhook: Missing rentalRequestId in session metadata.");
+    return;
+  }
+
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: { rentalRequestId },
+      data: {
+        status: PaymentStatus.COMPLETED,
+        transactionId: session.payment_intent as string,
+        paidAt: new Date(),
+      },
+    }),
+    prisma.rentalRequest.update({
+      where: { id: rentalRequestId },
+      data: { status: RentalStatus.ACTIVE },
+    }),
+  ]);
 };
