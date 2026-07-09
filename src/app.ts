@@ -42,6 +42,7 @@ app.use("/api/rentals", RentalRequestRoutes);
 app.use("/api/reviews", ReviewRoutes);
 app.use("/api/users", UserRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/admin", AdminRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
