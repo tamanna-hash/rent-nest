@@ -3,7 +3,6 @@ import { prisma } from "../../lib/prisma";
 import {
   CreatePropertyPayload,
   PropertyFilters,
-  PropertyQuery,
   UpdatePropertyPayload,
 } from "./property.interface";
 import { Prisma } from "../../../generated/prisma/client";
