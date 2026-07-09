@@ -380,3 +380,13 @@ stripe listen --forward-to localhost:5000/api/payments/webhook
 | `npm run dev` | Start dev server with tsx watch |
 | `npm run build` | Compile TypeScript to `dist/` |
 | `npm start` | Run compiled production build |
+
+## 💙 A Note from the Developer
+
+Hello! I'm **Tamanna**.
+
+Building RentNest gave me the opportunity to deepen my understanding of backend development, RESTful API design, authentication, database modeling, role-based access control, and secure payment integration with Stripe.
+
+I believe great software is built through continuous learning, curiosity, and persistence. Thank you for taking the time to explore my work. I hope you find it useful!
+
+Thank you for checking out this project! ❤️
