@@ -26,4 +26,11 @@ router.get(
   paymentController.getMyPayments
 );
 
+// Get a Single Payment by ID
+router.get(
+  "/:id",
+  auth(Role.TENANT),
+  paymentController.getPaymentById
+);
+
 export const paymentRoutes = router;

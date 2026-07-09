@@ -2,8 +2,7 @@ import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
-import httpStatus from "http-status";
-import { handlePaymentSucceeded } from "./subscription.utils";
+import { handlePaymentSucceeded, handlePaymentFailed } from "./subscription.utils";
 
 const createPaymentIntent = async (userId: string, rentalRequestId: string) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -52,6 +51,7 @@ const createPaymentIntent = async (userId: string, rentalRequestId: string) => {
   await prisma.payment.create({
     data: {
       amount: rentalRequest.property.price,
+      provider: "STRIPE",
       status: "PENDING",
       rentalRequestId,
     },
@@ -72,6 +72,10 @@ const handleWebhook = async (payload: Buffer, signature: string) => {
   switch (event.type) {
     case "payment_intent.succeeded":
       await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
+      break;
+
+    case "payment_intent.payment_failed":
+      await handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
       break;
 
     default:
@@ -99,8 +103,36 @@ const getMyPayments = async (userId: string) => {
   });
 };
 
+const getPaymentById = async (paymentId: string, userId: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    include: {
+      rentalRequest: {
+        include: {
+          property: true,
+          tenant: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    throw new Error("Payment not found");
+  }
+
+  // Only the tenant who made the payment or an admin can view it
+  if (payment.rentalRequest.tenantId !== userId) {
+    throw new Error("You are not authorized to view this payment");
+  }
+
+  return payment;
+};
+
 export const paymentService = {
   createPaymentIntent,
   handleWebhook,
   getMyPayments,
+  getPaymentById,
 };

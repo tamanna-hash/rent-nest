@@ -29,13 +29,13 @@ const createReview = async (
     where: {
       tenantId,
       propertyId,
-      status: RentalStatus.APPROVED,
+      status: { in: [RentalStatus.ACTIVE, RentalStatus.COMPLETED] },
     },
   });
 
   if (!approvedRental) {
     throw new Error(
-      "You can only review properties you have rented"
+      "You can only review properties you have paid for and rented"
     );
   }
 

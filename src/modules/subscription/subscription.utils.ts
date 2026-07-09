@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { PaymentStatus } from "../../../generated/prisma/enums";
+import { PaymentStatus, RentalStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
 export const handlePaymentSucceeded = async (
@@ -12,26 +12,21 @@ export const handlePaymentSucceeded = async (
     return;
   }
 
-  // Update payment record
-  await prisma.payment.update({
-    where: {
-      rentalRequestId,
-    },
-    data: {
-      status: PaymentStatus.PAID,
-      transactionId: paymentIntent.id,
-    },
-  });
-
-  // Update rental request
-  await prisma.rentalRequest.update({
-    where: {
-      id: rentalRequestId,
-    },
-    data: {
-      paymentStatus: PaymentStatus.PAID,
-    },
-  });
+  // Update payment to COMPLETED and rental request to ACTIVE (tenant has paid, move-in phase)
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: { rentalRequestId },
+      data: {
+        status: PaymentStatus.COMPLETED,
+        transactionId: paymentIntent.id,
+        paidAt: new Date(),
+      },
+    }),
+    prisma.rentalRequest.update({
+      where: { id: rentalRequestId },
+      data: { status: RentalStatus.APPROVED },
+    }),
+  ]);
 };
 
 export const handlePaymentFailed = async (
@@ -45,11 +40,7 @@ export const handlePaymentFailed = async (
   }
 
   await prisma.payment.update({
-    where: {
-      rentalRequestId,
-    },
-    data: {
-      status: PaymentStatus.FAILED,
-    },
+    where: { rentalRequestId },
+    data: { status: PaymentStatus.FAILED },
   });
 };
