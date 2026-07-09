@@ -383,6 +383,9 @@ npm start
 stripe listen --forward-to localhost:5000/api/payments/webhook
 ```
 
+> This gives you a temporary `whsec_...` secret — use it as `STRIPE_WEBHOOK_SECRET` in your local `.env`.
+> For production, the secret comes from the Stripe Dashboard webhook you created pointing to `https://rent-nest-bxfx.vercel.app/api/payments/webhook`.
+
 ---
 
 ## Deploying to Vercel
@@ -424,13 +427,15 @@ Vercel will run `npm run vercel-build` (which runs `prisma generate && tsc`) and
 In your [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks), update the endpoint URL to your Vercel domain:
 
 ```
-https://your-app.vercel.app/api/payments/webhook
+https://rent-nest-bxfx.vercel.app/api/payments/webhook
 ```
 
 Add these events:
 - `payment_intent.succeeded`
 - `payment_intent.payment_failed`
 - `checkout.session.completed`
+
+> ⚠️ The `STRIPE_WEBHOOK_SECRET` you set in Vercel's environment variables must be the signing secret for **this production webhook endpoint**, not the one from your local `stripe listen` session. Copy it from the Stripe Dashboard after creating the webhook.
 
 ---
 
