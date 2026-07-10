@@ -67,6 +67,20 @@ const getMyRequests = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getSingleRequest = catchAsync(async (req: Request, res: Response) => {
+  const result = await LandlordService.getSingleRequest(
+    req.user!.id,
+    req.params.id as string
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Rental request retrieved successfully",
+    data: result,
+  });
+});
+
 const approveRequest = catchAsync(async (req: Request, res: Response) => {
   const result = await LandlordService.approveRequest(
     req.user!.id,
@@ -101,6 +115,7 @@ export const LandlordController = {
   updateProperty,
   deleteProperty,
   getMyRequests,
+  getSingleRequest,
   approveRequest,
   rejectRequest,
 };

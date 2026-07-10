@@ -20,6 +20,8 @@ router.delete("/properties/:id", LandlordController.deleteProperty);
 // ── Rental Requests ─────────────────────────────────────────────────────────
 router.get("/requests", LandlordController.getMyRequests);
 
+router.get("/requests/:id", LandlordController.getSingleRequest);
+
 router.patch("/requests/:id/approve", LandlordController.approveRequest);
 
 router.patch("/requests/:id/reject", LandlordController.rejectRequest);

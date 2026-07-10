@@ -73,6 +73,27 @@ const deleteProperty = async (landlordId: string, propertyId: string) => {
 
 // ── Rental Requests ───────────────────────────────────────────────────────────
 
+const getSingleRequest = async (landlordId: string, requestId: string) => {
+  const request = await prisma.rentalRequest.findUnique({
+    where: { id: requestId },
+    include: {
+      tenant: {
+        select: { id: true, name: true, email: true, phone: true, image: true },
+      },
+      property: true,
+      payment: true,
+    },
+  });
+
+  if (!request) throw new Error("Rental request not found");
+
+  // Ensure the request belongs to one of this landlord's properties
+  if (request.property.landlordId !== landlordId)
+    throw new Error("You are not authorized to view this request");
+
+  return request;
+};
+
 const getMyRequests = async (landlordId: string) => {
   return prisma.rentalRequest.findMany({
     where: { property: { landlordId } },
@@ -140,6 +161,7 @@ export const LandlordService = {
   updateProperty,
   deleteProperty,
   getMyRequests,
+  getSingleRequest,
   approveRequest,
   rejectRequest,
 };
