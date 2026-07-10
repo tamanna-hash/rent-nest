@@ -40,12 +40,20 @@ const handleWebhook = catchAsync(
   async (req: Request & { rawBody?: Buffer }, res: Response, next: NextFunction) => {
     const signature = req.headers["stripe-signature"] as string;
 
-    // Use the raw buffer captured by the verify callback in express.json().
-    // This works on both local Express and Vercel serverless.
-    const payload = req.rawBody;
+    if (!signature) {
+      res.status(400).json({ error: "Missing stripe-signature header" });
+      return;
+    }
 
-    if (!payload) {
-      res.status(400).json({ error: "Missing raw body for webhook verification" });
+    // express.raw() puts the raw Buffer directly on req.body for this route.
+    // req.rawBody is a fallback captured by the express.json() verify callback
+    // on other routes — not needed here but kept for safety.
+    const payload: Buffer = Buffer.isBuffer(req.body)
+      ? req.body
+      : req.rawBody ?? Buffer.from(JSON.stringify(req.body));
+
+    if (!payload || payload.length === 0) {
+      res.status(400).json({ error: "Empty webhook payload" });
       return;
     }
 

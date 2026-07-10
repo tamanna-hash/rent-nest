@@ -22,9 +22,15 @@ app.use(
   }),
 );
 
-// Capture raw body for Stripe webhook signature verification.
-// Works on both local and Vercel (where the body stream is pre-consumed).
-// We attach the raw buffer to req.rawBody so the webhook handler can use it.
+// Stripe webhook needs the raw body buffer for signature verification.
+// Register express.raw() ONLY for the webhook path, BEFORE express.json().
+// This must come first so the stream is consumed as raw bytes for this route.
+app.use(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" })
+);
+
+// All other routes get JSON parsing with rawBody capture as a fallback
 app.use(
   express.json({
     verify: (req: Request & { rawBody?: Buffer }, _res, buf) => {
