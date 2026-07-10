@@ -12,7 +12,10 @@ export const handlePaymentSucceeded = async (
     return;
   }
 
-  // Update payment to COMPLETED and rental request to ACTIVE (tenant has paid, move-in phase)
+  // Idempotency guard — skip if already processed
+  const payment = await prisma.payment.findUnique({ where: { rentalRequestId } });
+  if (!payment || payment.status === PaymentStatus.COMPLETED) return;
+
   await prisma.$transaction([
     prisma.payment.update({
       where: { rentalRequestId },
@@ -39,6 +42,10 @@ export const handlePaymentFailed = async (
     return;
   }
 
+  // Idempotency guard — skip if already in a terminal state
+  const payment = await prisma.payment.findUnique({ where: { rentalRequestId } });
+  if (!payment || payment.status === PaymentStatus.COMPLETED || payment.status === PaymentStatus.FAILED) return;
+
   await prisma.payment.update({
     where: { rentalRequestId },
     data: { status: PaymentStatus.FAILED },
@@ -54,6 +61,10 @@ export const handleCheckoutSessionCompleted = async (
     console.log("Webhook: Missing rentalRequestId in session metadata.");
     return;
   }
+
+  // Idempotency guard — skip if already processed
+  const payment = await prisma.payment.findUnique({ where: { rentalRequestId } });
+  if (!payment || payment.status === PaymentStatus.COMPLETED) return;
 
   await prisma.$transaction([
     prisma.payment.update({
