@@ -2,7 +2,11 @@ import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
-import { handlePaymentSucceeded, handlePaymentFailed, handleCheckoutSessionCompleted } from "./payment.utils";
+import {
+  handlePaymentSucceeded,
+  handlePaymentFailed,
+  handleCheckoutSessionCompleted,
+} from "./payment.utils";
 
 const createPaymentIntent = async (userId: string, rentalRequestId: string) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -42,10 +46,13 @@ const createPaymentIntent = async (userId: string, rentalRequestId: string) => {
   return { clientSecret: paymentIntent.client_secret };
 };
 
-const createCheckoutSession = async (userId: string, rentalRequestId: string) => {
+const createCheckoutSession = async (
+  userId: string,
+  rentalRequestId: string,
+) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
     where: { id: rentalRequestId },
-    include: { property: true, payment: true, tenant: true,},
+    include: { property: true, payment: true, tenant: true },
   });
 
   if (!rentalRequest) throw new Error("Rental request not found");
@@ -53,9 +60,24 @@ const createCheckoutSession = async (userId: string, rentalRequestId: string) =>
   if (rentalRequest.tenantId !== userId)
     throw new Error("You are not authorized to pay for this rental request");
 
-  if (rentalRequest.status !== "APPROVED")
+  // if (rentalRequest.status !== "APPROVED")
+  //   throw new Error("Rental request has not been approved yet");
+  if (rentalRequest.status === "PENDING") {
     throw new Error("Rental request has not been approved yet");
+  }
 
+  if (rentalRequest.status === "REJECTED") {
+    throw new Error("Rental request was rejected");
+  }
+
+  if (
+    rentalRequest.status === "ACTIVE" ||
+    rentalRequest.status === "COMPLETED"
+  ) {
+    throw new Error(
+      "Payment has already been completed for this rental request",
+    );
+  }
   if (rentalRequest.payment)
     throw new Error("Payment has already been made for this rental request");
 
@@ -64,7 +86,7 @@ const createCheckoutSession = async (userId: string, rentalRequestId: string) =>
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
-      customer_email: rentalRequest.tenant.email,
+    customer_email: rentalRequest.tenant.email,
     line_items: [
       {
         price_data: {
@@ -113,7 +135,9 @@ const handleWebhook = async (payload: Buffer, signature: string) => {
       break;
 
     case "checkout.session.completed":
-      await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+      await handleCheckoutSessionCompleted(
+        event.data.object as Stripe.Checkout.Session,
+      );
       break;
 
     default:
