@@ -10,7 +10,7 @@ import { CategoryRoutes } from "./modules/category/category.route";
 import { RentalRequestRoutes } from "./modules/rental/rental.route";
 import { ReviewRoutes } from "./modules/review/review.route";
 import { UserRoutes } from "./modules/user/user.route";
-import { paymentRoutes } from "./modules/subscription/subscription.route";
+import { paymentRoutes } from "./modules/payment/payment.route";
 import { AdminRoutes } from "./modules/admin/admin.route";
 
 const app: Application = express();
@@ -22,12 +22,16 @@ app.use(
   }),
 );
 
-// app.use("/api/subscription/webhook", express.raw({ type: 'application/json' }))
+// Capture raw body for Stripe webhook signature verification.
+// Works on both local and Vercel (where the body stream is pre-consumed).
+// We attach the raw buffer to req.rawBody so the webhook handler can use it.
 app.use(
-  "/api/payments/webhook",
-  express.raw({ type: "application/json" })
+  express.json({
+    verify: (req: Request & { rawBody?: Buffer }, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
 );
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
