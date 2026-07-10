@@ -80,10 +80,15 @@ const getAllRentalRequests = async () => {
     orderBy: { createdAt: "desc" },
   });
 };
-
+const getAllPayments = async () => {
+  return prisma.payment.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+};
 export const AdminService = {
   getAllUsers,
   updateUserStatus,
   getAllProperties,
   getAllRentalRequests,
+  getAllPayments
 };

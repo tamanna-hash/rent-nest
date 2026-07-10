@@ -19,4 +19,6 @@ router.get("/properties", AdminController.getAllProperties);
 // ── Rental Requests ────────────────────────────────
 router.get("/rentals", AdminController.getAllRentalRequests);
 
+router.get("/payments", auth(Role.ADMIN), AdminController.getAllPayments);
+
 export const AdminRoutes = router;

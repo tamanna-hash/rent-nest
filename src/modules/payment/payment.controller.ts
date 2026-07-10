@@ -9,7 +9,10 @@ const createPaymentIntent = catchAsync(
     const userId = req.user!.id;
     const { rentalRequestId } = req.body;
 
-    const result = await paymentService.createPaymentIntent(userId, rentalRequestId);
+    const result = await paymentService.createPaymentIntent(
+      userId,
+      rentalRequestId,
+    );
 
     sendResponse(res, {
       success: true,
@@ -17,7 +20,7 @@ const createPaymentIntent = catchAsync(
       message: "Payment intent created successfully",
       data: result,
     });
-  }
+  },
 );
 
 const createCheckoutSession = catchAsync(
@@ -25,7 +28,10 @@ const createCheckoutSession = catchAsync(
     const userId = req.user!.id;
     const { rentalRequestId } = req.body;
 
-    const result = await paymentService.createCheckoutSession(userId, rentalRequestId);
+    const result = await paymentService.createCheckoutSession(
+      userId,
+      rentalRequestId,
+    );
 
     sendResponse(res, {
       success: true,
@@ -33,11 +39,15 @@ const createCheckoutSession = catchAsync(
       message: "Checkout session created successfully",
       data: result,
     });
-  }
+  },
 );
 
 const handleWebhook = catchAsync(
-  async (req: Request & { rawBody?: Buffer }, res: Response, next: NextFunction) => {
+  async (
+    req: Request & { rawBody?: Buffer },
+    res: Response,
+    next: NextFunction,
+  ) => {
     const signature = req.headers["stripe-signature"] as string;
 
     if (!signature) {
@@ -50,7 +60,7 @@ const handleWebhook = catchAsync(
     // on other routes — not needed here but kept for safety.
     const payload: Buffer = Buffer.isBuffer(req.body)
       ? req.body
-      : req.rawBody ?? Buffer.from(JSON.stringify(req.body));
+      : (req.rawBody ?? Buffer.from(JSON.stringify(req.body)));
 
     if (!payload || payload.length === 0) {
       res.status(400).json({ error: "Empty webhook payload" });
@@ -60,7 +70,7 @@ const handleWebhook = catchAsync(
     await paymentService.handleWebhook(payload, signature);
 
     res.status(200).json({ received: true });
-  }
+  },
 );
 
 const getMyPayments = catchAsync(
@@ -75,8 +85,9 @@ const getMyPayments = catchAsync(
       message: "Payments retrieved successfully",
       data: result,
     });
-  }
+  },
 );
+
 
 const getPaymentById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -91,7 +102,7 @@ const getPaymentById = catchAsync(
       message: "Payment retrieved successfully",
       data: result,
     });
-  }
+  },
 );
 
 export const paymentController = {

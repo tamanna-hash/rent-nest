@@ -9,34 +9,23 @@ const router = Router();
 router.post(
   "/create-payment-intent",
   auth(Role.TENANT),
-  paymentController.createPaymentIntent
+  paymentController.createPaymentIntent,
 );
 
 // Create Checkout Session (Stripe-hosted page with success/cancel redirect)
 router.post(
   "/create-checkout-session",
   auth(Role.TENANT),
-  paymentController.createCheckoutSession
+  paymentController.createCheckoutSession,
 );
 
 // Stripe Webhook (raw body — must come before express.json())
-router.post(
-  "/webhook",
-  paymentController.handleWebhook
-);
+router.post("/webhook", paymentController.handleWebhook);
 
 // Get logged-in tenant's full payment history
-router.get(
-  "/my-payments",
-  auth(Role.TENANT),
-  paymentController.getMyPayments
-);
+router.get("/my-payments", auth(Role.TENANT), paymentController.getMyPayments);
 
 // Get a single payment by ID
-router.get(
-  "/:id",
-  auth(Role.TENANT),
-  paymentController.getPaymentById
-);
+router.get("/:id", auth(Role.TENANT), paymentController.getPaymentById);
 
 export const paymentRoutes = router;
