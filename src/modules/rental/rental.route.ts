@@ -3,51 +3,22 @@ import { Role } from "../../../generated/prisma/enums";
 import { auth } from "../../middlewares/auth";
 import { RentalRequestController } from "./rental.controller";
 
-
 const router = Router();
 
-// Tenant Routes
-router.post(
-  "/",
-  auth(Role.TENANT),
-  RentalRequestController.createRentalRequest
-);
+// ── Tenant Routes ─────────────────────────────────────────────────────────────
 
-router.get(
-  "/",
-  auth(Role.ADMIN),
-  RentalRequestController.getAllRentalRequests
-);
+// Submit a new rental request
+router.post("/", auth(Role.TENANT), RentalRequestController.createRentalRequest);
 
-router.get(
-  "/my",
-  auth(Role.TENANT),
-  RentalRequestController.getMyRentalRequests
-);
+// View own rental history
+router.get("/my", auth(Role.TENANT), RentalRequestController.getMyRentalRequests);
 
-router.delete(
-  "/:id",
-  auth(Role.TENANT),
-  RentalRequestController.cancelRentalRequest
-);
+// Cancel a pending request
+router.delete("/:id", auth(Role.TENANT), RentalRequestController.cancelRentalRequest);
 
-// Landlord Routes
-router.get(
-  "/landlord",
-  auth(Role.LANDLORD),
-  RentalRequestController.getRentalRequestsForLandlord
-);
+// ── Admin Routes ──────────────────────────────────────────────────────────────
 
-router.patch(
-  "/:id/approve",
-  auth(Role.LANDLORD),
-  RentalRequestController.approveRentalRequest
-);
-
-router.patch(
-  "/:id/reject",
-  auth(Role.LANDLORD),
-  RentalRequestController.rejectRentalRequest
-);
+// View all rental requests (landlord management moved to /api/landlord/requests)
+router.get("/", auth(Role.ADMIN), RentalRequestController.getAllRentalRequests);
 
 export const RentalRequestRoutes = router;
