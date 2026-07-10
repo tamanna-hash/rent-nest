@@ -1,10 +1,16 @@
 import { RentalStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { CreatePropertyPayload, UpdatePropertyPayload } from "../property/property.interface";
+import {
+  CreatePropertyPayload,
+  UpdatePropertyPayload,
+} from "../property/property.interface";
 
 // ── Properties ────────────────────────────────────────────────────────────────
 
-const createProperty = async (landlordId: string, payload: CreatePropertyPayload) => {
+const createProperty = async (
+  landlordId: string,
+  payload: CreatePropertyPayload,
+) => {
   const category = await prisma.category.findUnique({
     where: { id: payload.categoryId },
   });
@@ -34,9 +40,11 @@ const getMyProperties = async (landlordId: string) => {
 const updateProperty = async (
   landlordId: string,
   propertyId: string,
-  payload: UpdatePropertyPayload
+  payload: UpdatePropertyPayload,
 ) => {
-  const property = await prisma.property.findUnique({ where: { id: propertyId } });
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+  });
 
   if (!property) throw new Error("Property not found");
   if (property.landlordId !== landlordId)
@@ -50,7 +58,9 @@ const updateProperty = async (
 };
 
 const deleteProperty = async (landlordId: string, propertyId: string) => {
-  const property = await prisma.property.findUnique({ where: { id: propertyId } });
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+  });
 
   if (!property) throw new Error("Property not found");
   if (property.landlordId !== landlordId)
@@ -67,7 +77,9 @@ const getMyRequests = async (landlordId: string) => {
   return prisma.rentalRequest.findMany({
     where: { property: { landlordId } },
     include: {
-      tenant: { select: { id: true, name: true, email: true, phone: true, image: true } },
+      tenant: {
+        select: { id: true, name: true, email: true, phone: true, image: true },
+      },
       property: true,
       payment: true,
     },
