@@ -155,11 +155,6 @@ RentNest/
 │       │   ├── auth.route.ts
 │       │   └── auth.service.ts
 │       │
-│       ├── user/                   # Admin: list all users, ban/unban
-│       │   ├── user.controller.ts
-│       │   ├── user.interface.ts
-│       │   ├── user.route.ts
-│       │   └── user.service.ts
 │       │
 │       ├── admin/                  # Admin-specific routes (users, properties, rentals)
 │       │   ├── admin.controller.ts
@@ -185,13 +180,8 @@ RentNest/
 │       │   ├── rental.route.ts
 │       │   └── rental.service.ts
 │       │
-│       ├── subscription/           # Stripe payments (intent, webhook, history)
-│       │   ├── subscription.controller.ts
-│       │   ├── subscription.route.ts
-│       │   ├── subscription.service.ts
-│       │   └── subscription.utils.ts
 │       │
-│       ├── payment/                # Payment module (reserved / stub)
+│       ├── payment/                #  Stripe payments (intent, webhook, history)
 │       │   ├── payment.controller.ts
 │       │   ├── payment.interface.ts
 │       │   ├── payment.route.ts
