@@ -11,6 +11,7 @@ Built using a modern backend architecture with **Node.js**, **Express.js**, **Ty
 ---
 
 ## Tech Stack
+
 ![Node.js](https://img.shields.io/badge/Node.js-22.x-green)
 ![Express](https://img.shields.io/badge/Express-5.x-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
@@ -86,18 +87,18 @@ Built using a modern backend architecture with **Node.js**, **Express.js**, **Ty
 
 ## 🛠️ Tech Stack
 
-| Category | Technologies |
-|-----------|--------------|
-| Runtime | Node.js |
-| Framework | Express.js 5 |
-| Language | TypeScript |
-| Database | PostgreSQL |
-| ORM | Prisma ORM |
-| Authentication | JWT, bcryptjs |
-| Payment Gateway | Stripe |
-| Configuration | dotenv |
-| API Testing | Postman |
-| Development | ts-node-dev |
+| Category        | Technologies  |
+| --------------- | ------------- |
+| Runtime         | Node.js       |
+| Framework       | Express.js 5  |
+| Language        | TypeScript    |
+| Database        | PostgreSQL    |
+| ORM             | Prisma ORM    |
+| Authentication  | JWT, bcryptjs |
+| Payment Gateway | Stripe        |
+| Configuration   | dotenv        |
+| API Testing     | Postman       |
+| Development     | ts-node-dev   |
 
 ---
 
@@ -155,6 +156,11 @@ RentNest/
 │       │   ├── auth.route.ts
 │       │   └── auth.service.ts
 │       │
+│       ├── landlord/                   # Landlord-specific routes
+│       │   ├── landlord.controller.ts
+│       │   ├── landlord.interface.ts
+│       │   ├── landlord.route.ts
+│       │   └── landlord.service.ts
 │       │
 │       ├── admin/                  # Admin-specific routes (users, properties, rentals)
 │       │   ├── admin.controller.ts
@@ -204,14 +210,14 @@ RentNest/
 
 ## Database Schema
 
-| Model | Key Fields |
-|---|---|
-| User | id, name, email, password, role, status, phone, image, address |
-| Property | id, title, description, location, price, bedrooms, bathrooms, amenities[], isAvailable, categoryId, landlordId |
-| Category | id, name |
-| RentalRequest | id, tenantId, propertyId, message, status (PENDING/APPROVED/REJECTED/ACTIVE/COMPLETED) |
-| Payment | id, transactionId, amount, provider (STRIPE/SSLCOMMERZ), status (PENDING/COMPLETED/FAILED), paidAt, rentalRequestId |
-| Review | id, tenantId, propertyId, rating, comment |
+| Model         | Key Fields                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| User          | id, name, email, password, role, status, phone, image, address                                                      |
+| Property      | id, title, description, location, price, bedrooms, bathrooms, amenities[], isAvailable, categoryId, landlordId      |
+| Category      | id, name                                                                                                            |
+| RentalRequest | id, tenantId, propertyId, message, status (PENDING/APPROVED/REJECTED/ACTIVE/COMPLETED)                              |
+| Payment       | id, transactionId, amount, provider (STRIPE/SSLCOMMERZ), status (PENDING/COMPLETED/FAILED), paidAt, rentalRequestId |
+| Review        | id, tenantId, propertyId, rating, comment                                                                           |
 
 ---
 
@@ -219,57 +225,57 @@ RentNest/
 
 ### Authentication — `/api/auth`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/api/auth/register` | Public | Register as TENANT or LANDLORD |
-| POST | `/api/auth/login` | Public | Login, returns access + refresh token |
-| POST | `/api/auth/refresh-token` | Public | Get new access token |
-| GET | `/api/auth/me` | Auth | Get current user profile |
-| PATCH | `/api/auth/me` | Auth | Update profile (name, phone, image) |
+| Method | Endpoint                  | Access | Description                           |
+| ------ | ------------------------- | ------ | ------------------------------------- |
+| POST   | `/api/auth/register`      | Public | Register as TENANT or LANDLORD        |
+| POST   | `/api/auth/login`         | Public | Login, returns access + refresh token |
+| POST   | `/api/auth/refresh-token` | Public | Get new access token                  |
+| GET    | `/api/auth/me`            | Auth   | Get current user profile              |
+| PATCH  | `/api/auth/me`            | Auth   | Update profile (name, phone, image)   |
 
 ### Properties — `/api/properties`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/api/properties` | Public | List all properties with filters |
-| GET | `/api/properties/:id` | Public | Get property details |
-| POST | `/api/properties` | Landlord | Create a new property listing |
-| PATCH | `/api/properties/:id` | Landlord / Admin | Update a property listing |
-| DELETE | `/api/properties/:id` | Landlord / Admin | Remove a property listing |
+| Method | Endpoint              | Access           | Description                      |
+| ------ | --------------------- | ---------------- | -------------------------------- |
+| GET    | `/api/properties`     | Public           | List all properties with filters |
+| GET    | `/api/properties/:id` | Public           | Get property details             |
+| POST   | `/api/properties`     | Landlord         | Create a new property listing    |
+| PATCH  | `/api/properties/:id` | Landlord / Admin | Update a property listing        |
+| DELETE | `/api/properties/:id` | Landlord / Admin | Remove a property listing        |
 
 **Available query filters:** `search`, `location`, `minPrice`, `maxPrice`, `propertyType`, `amenities`, `page`, `limit`
 
 ### Categories — `/api/categories`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/api/categories` | Public | Get all categories |
-| GET | `/api/categories/:id` | Public | Get single category |
-| POST | `/api/categories` | Admin | Create category |
-| PATCH | `/api/categories/:id` | Admin | Update category |
-| DELETE | `/api/categories/:id` | Admin | Delete category |
+| Method | Endpoint              | Access | Description         |
+| ------ | --------------------- | ------ | ------------------- |
+| GET    | `/api/categories`     | Public | Get all categories  |
+| GET    | `/api/categories/:id` | Public | Get single category |
+| POST   | `/api/categories`     | Admin  | Create category     |
+| PATCH  | `/api/categories/:id` | Admin  | Update category     |
+| DELETE | `/api/categories/:id` | Admin  | Delete category     |
 
 ### Rental Requests — `/api/rentals`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/api/rentals` | Tenant | Submit a rental request |
-| GET | `/api/rentals/my` | Tenant | Get own rental request history |
-| DELETE | `/api/rentals/:id` | Tenant | Cancel a pending rental request |
-| GET | `/api/rentals/landlord` | Landlord | View all requests for own properties |
-| PATCH | `/api/rentals/:id/approve` | Landlord | Approve a rental request |
-| PATCH | `/api/rentals/:id/reject` | Landlord | Reject a rental request |
-| GET | `/api/rentals` | Admin | View all rental requests |
+| Method | Endpoint                   | Access   | Description                          |
+| ------ | -------------------------- | -------- | ------------------------------------ |
+| POST   | `/api/rentals`             | Tenant   | Submit a rental request              |
+| GET    | `/api/rentals/my`          | Tenant   | Get own rental request history       |
+| DELETE | `/api/rentals/:id`         | Tenant   | Cancel a pending rental request      |
+| GET    | `/api/rentals/landlord`    | Landlord | View all requests for own properties |
+| PATCH  | `/api/rentals/:id/approve` | Landlord | Approve a rental request             |
+| PATCH  | `/api/rentals/:id/reject`  | Landlord | Reject a rental request              |
+| GET    | `/api/rentals`             | Admin    | View all rental requests             |
 
 ### Payments — `/api/payments`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/api/payments/create-payment-intent` | Tenant | Create Stripe PaymentIntent (use with Stripe Elements) |
-| POST | `/api/payments/create-checkout-session` | Tenant | Create Stripe Checkout Session (returns redirect URL) |
-| POST | `/api/payments/webhook` | Stripe | Stripe webhook — handles `payment_intent.succeeded`, `payment_intent.payment_failed`, `checkout.session.completed` |
-| GET | `/api/payments/my-payments` | Tenant | View own payment history |
-| GET | `/api/payments/:id` | Tenant | Get single payment details |
+| Method | Endpoint                                | Access | Description                                                                                                        |
+| ------ | --------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------ |
+| POST   | `/api/payments/create-payment-intent`   | Tenant | Create Stripe PaymentIntent (use with Stripe Elements)                                                             |
+| POST   | `/api/payments/create-checkout-session` | Tenant | Create Stripe Checkout Session (returns redirect URL)                                                              |
+| POST   | `/api/payments/webhook`                 | Stripe | Stripe webhook — handles `payment_intent.succeeded`, `payment_intent.payment_failed`, `checkout.session.completed` |
+| GET    | `/api/payments/my-payments`             | Tenant | View own payment history                                                                                           |
+| GET    | `/api/payments/:id`                     | Tenant | Get single payment details                                                                                         |
 
 **Two payment flows are supported:**
 
@@ -281,21 +287,21 @@ Both flows mark the payment `COMPLETED` and the rental `ACTIVE` via webhook.
 
 ### Reviews — `/api/reviews`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/api/reviews/property/:propertyId` | Public | Get all reviews for a property |
-| POST | `/api/reviews` | Tenant | Create a review (requires ACTIVE/COMPLETED rental) |
-| PATCH | `/api/reviews/:id` | Tenant | Update own review |
-| DELETE | `/api/reviews/:id` | Tenant | Delete own review |
+| Method | Endpoint                            | Access | Description                                        |
+| ------ | ----------------------------------- | ------ | -------------------------------------------------- |
+| GET    | `/api/reviews/property/:propertyId` | Public | Get all reviews for a property                     |
+| POST   | `/api/reviews`                      | Tenant | Create a review (requires ACTIVE/COMPLETED rental) |
+| PATCH  | `/api/reviews/:id`                  | Tenant | Update own review                                  |
+| DELETE | `/api/reviews/:id`                  | Tenant | Delete own review                                  |
 
 ### Admin — `/api/admin`
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/api/admin/users` | Admin | Get all users |
-| PATCH | `/api/admin/users/:id` | Admin | Update user status (ban/unban) |
-| GET | `/api/admin/properties` | Admin | Get all properties |
-| GET | `/api/admin/rentals` | Admin | Get all rental requests |
+| Method | Endpoint                | Access | Description                    |
+| ------ | ----------------------- | ------ | ------------------------------ |
+| GET    | `/api/admin/users`      | Admin  | Get all users                  |
+| PATCH  | `/api/admin/users/:id`  | Admin  | Update user status (ban/unban) |
+| GET    | `/api/admin/properties` | Admin  | Get all properties             |
+| GET    | `/api/admin/rentals`    | Admin  | Get all rental requests        |
 
 ---
 
@@ -392,19 +398,19 @@ Go to [vercel.com](https://vercel.com), click **Add New Project**, and import yo
 
 In the Vercel project dashboard go to **Settings → Environment Variables** and add every key from your `.env`:
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `BCRYPT_SALT_ROUNDS` | e.g. `10` |
-| `JWT_ACCESS_SECRET` | JWT signing secret |
-| `JWT_REFRESH_SECRET` | JWT refresh secret |
-| `JWT_ACCESS_EXPIRES_IN` | e.g. `1d` |
-| `JWT_REFRESH_EXPIRES_IN` | e.g. `7d` |
-| `STRIPE_SECRET_KEY` | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `PAYMENT_SUCCESS_URL` | Frontend success redirect URL |
-| `PAYMENT_CANCEL_URL` | Frontend cancel redirect URL |
-| `APP_URL` | Frontend origin for CORS |
+| Variable                 | Description                   |
+| ------------------------ | ----------------------------- |
+| `DATABASE_URL`           | PostgreSQL connection string  |
+| `BCRYPT_SALT_ROUNDS`     | e.g. `10`                     |
+| `JWT_ACCESS_SECRET`      | JWT signing secret            |
+| `JWT_REFRESH_SECRET`     | JWT refresh secret            |
+| `JWT_ACCESS_EXPIRES_IN`  | e.g. `1d`                     |
+| `JWT_REFRESH_EXPIRES_IN` | e.g. `7d`                     |
+| `STRIPE_SECRET_KEY`      | Stripe secret key             |
+| `STRIPE_WEBHOOK_SECRET`  | Stripe webhook signing secret |
+| `PAYMENT_SUCCESS_URL`    | Frontend success redirect URL |
+| `PAYMENT_CANCEL_URL`     | Frontend cancel redirect URL  |
+| `APP_URL`                | Frontend origin for CORS      |
 
 > Do **not** add `PORT` — Vercel manages the port automatically.
 
@@ -421,6 +427,7 @@ https://rent-nest-bxfx.vercel.app/api/payments/webhook
 ```
 
 Add these events:
+
 - `payment_intent.succeeded`
 - `payment_intent.payment_failed`
 - `checkout.session.completed`
@@ -431,11 +438,11 @@ Add these events:
 
 ## Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start dev server with tsx watch |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Run compiled production build |
+| Script          | Description                     |
+| --------------- | ------------------------------- |
+| `npm run dev`   | Start dev server with tsx watch |
+| `npm run build` | Compile TypeScript to `dist/`   |
+| `npm start`     | Run compiled production build   |
 
 ## 💙 A Note from the Developer
 
