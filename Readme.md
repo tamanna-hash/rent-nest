@@ -9,7 +9,7 @@ The platform enables landlords to publish and manage property listings, tenants 
 Built using a modern backend architecture with **Node.js**, **Express.js**, **TypeScript**, **Prisma ORM**, **PostgreSQL**, **JWT Authentication**, and **Stripe Payment Integration**, RentNest focuses on scalability, maintainability, and clean API design.
 
 
-Live url: https://rent-nest-bxfx.vercel.app
+### Live url: https://rent-nest-bxfx.vercel.app
 ---
 
 ## Tech Stack
